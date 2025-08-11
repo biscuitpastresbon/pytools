@@ -1,12 +1,23 @@
 """
-Low-level string formatting utilities.
+`stringformat` is a module dedicated to tools for "reversing" a string format.
 
-Do *NOT* import anything else than built-ins OR other `onpycommon` modules with only built-in imports.
+`extractValues` extracts values from a formatted string (eg: extracts the integer 14 from "frame_014.png"), 
+using the tokens identified in a given format string (in our example: "frame_{:03d}.png"). 
 
-To extend `FormatString` to work with new formatting syntaxes, create a token factory by subclassing `AbstractTokenFactory`
+`FormatString` represents the "frame_{:03d}.png" format string.
+`FormatToken` represents the `{:03d}` format token in the format string.
+`FormatType` objects represent format types such as the the "d"/integer type in the `{:03d}` token.
 
+To extend `FormatString` to work with new formatting syntaxes, create a token factory by subclassing `AbstractTokenFactory`.
+
+Existing token factories include:
+- `OldStyleTokenFactory`: matches old-style % format tokens.
+- `NewStyleTokenFactory`: matches new-style {} format tokens.
+- `RepeatedSymbolTokenFactory`: matches repeated symbol placeholders (eg: #### representing a 4 character integer).
+
+A format string must allow as many different tokens as possible. Token factory regex patterns are made to prevent matching issues when tokens coexist.
 """
-# /usr/bin/env python3
+# python3
 from __future__ import annotations
 
 import abc
@@ -133,11 +144,11 @@ class FormatString:
         >>> fstring = FormatString("%s {name} - #### - rendering ({percent:.0%})")
 
         Get all groups:
-            >>> fstring.extractValues("marinette beauty - 0004 - rendering (45%)")
-            ['marinette', 'beauty', 4, 0.45]
+            >>> fstring.extractValues("rabbit beauty - 0004 - rendering (45%)")
+            ['rabbit', 'beauty', 4, 0.45]
 
         Get named groups:
-            >>> fstring.groupDict("marinette beauty - 0004 - rendering (45%)")
+            >>> fstring.groupDict("rabbit beauty - 0004 - rendering (45%)")
             {'name': 'beauty', 'percent': 0.45}
 
         Translate to another syntax:
